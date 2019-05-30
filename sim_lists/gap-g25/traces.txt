@@ -1,6 +1,0 @@
-bc
-bfs
-cc
-pr
-sssp
-tc

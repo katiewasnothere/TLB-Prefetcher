@@ -30,7 +30,7 @@ then
 	sed -i.bak 's/\<uint64_t stream_start = 1\>/uint64_t stream_start = '${STREAM_START}'/g' prefetcher/${TLB_PREFETCHER}.tlb_pref
 fi
 
-#./build.sh ${TLB_PREFETCHER} ${NUM_CORES}
+#./build.sh ${TLB_PREFETCHER} ${NUM_CORE}
 
 
 sed -i.bak 's/\<uint64_t S = '${S}'\>/uint64_t S = 2/g' prefetcher/${TLB_PREFETCHER}.tlb_pref

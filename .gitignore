@@ -1,7 +1,10 @@
 bin
 obj
 logs
+output
+traces
 *.condor
 *.bak
+*.swp
 prefetcher/l2c_prefetcher.cc
 replacement/llc_replacement.cc

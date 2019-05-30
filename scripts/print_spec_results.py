@@ -2,6 +2,10 @@
 
 import os
 
+prefetcher = input("Enter the prefetcher:")
+print('\n')
+prefetcher = prefetcher[:-1]
+
 print('(suite, name of benchmark, IPC, Coverage, Prefetch Accuracy, Redundancy)')
 print('----------------------------------------')
 
@@ -11,7 +15,7 @@ champ_path = os.chdir("..")
 sim_list = open('sim_lists/spec/comp_traces.txt')
 for line in sim_list:
 	bench_name = line[:-1]
-	trace_output = open('output/lru/'+bench_name +'.txt', 'r')
+	trace_output = open('output/'+prefetcher+'/'+bench_name +'.txt', 'r')
 	result = 'spec'
 	for output_line in trace_output:	
 		if output_line.startswith('Finished CPU 0 instructions:'):
