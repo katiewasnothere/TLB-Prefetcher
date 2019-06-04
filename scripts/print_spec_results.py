@@ -4,7 +4,6 @@ import os
 
 prefetcher = input("Enter the prefetcher:")
 print('\n')
-prefetcher = prefetcher[:-1]
 
 print('(suite, name of benchmark, IPC, Coverage, Prefetch Accuracy, Redundancy)')
 print('----------------------------------------')

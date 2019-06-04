@@ -53,3 +53,5 @@ while read TRACE; do
     # submit the condor file
     /lusr/opt/condor/bin/condor_submit ${CONDOR_FILE}
 done < sim_lists/spec/comp_traces.txt
+
+#done < sim_lists/spec/astar.txt 

@@ -1,12 +1,14 @@
-#ifndef __GAC_H__
-#define __GAC_H__
+#ifndef __GAC_L_H__
+#define __GAC_L_H__
 
 #include <iostream>
+#include <queue>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <math.h>
 #include "champsim.h"
 
 typedef struct address_freq {
@@ -125,7 +127,7 @@ class GAC {
 
 		std::vector<uint64_t> freq_to_addresses(std::unordered_set<uint64_t> &freqs) {
 			int size = freqs.size();
-			if (size == 0) {
+			if (size <= 0) {
 				return {};
 			}
 			
@@ -143,43 +145,66 @@ class GAC {
 				}
 			}
 			// should not reach here, consider returning error 
-			return 0;
+			return -1;
 		}		
 
-		/*std::vector<addr_freq*> find_predicted_freqs() {
-			if (lookahead == 0) return corr_map[current_page];
-
-			std::vector<addr_freq*> predicted;
-			std::vector<addr_freq*> initial = corr_map[current_page];
-				
-			for (int index = 0; index < initial.size(); index++) {
-				uint64_t addr = initial[index]->address;
-				std::vector<addr_freq*> temp = corr_map[addr];
-				for (int i = 0; i < temp.size(); i++) {
-					 if (std::find(predicted.begin(), predicted.end(), temp[i]) == predicted.end()) {
-						predicted.push_back(temp[i]);
-					}
-				}
-			}
-			return predicted;	
-		}*/
-
-		std::unordered_set<uint64_t> find_predicted_freqs() {
+		/*std::unordered_set<uint64_t> find_predicted_freqs() {
 			std::vector<addr_freq*> initial = corr_map[current_page]; 
 			
 			std::unordered_set<uint64_t> predicted; 
 			
 			for (int i = 0; i < initial.size(); i++) {
 				uint64_t temp_address = initial[i]->address; 
-				//std::vector<addr_freq*> correlated;
-				/*for (int j = 0; j < lookahead; j++) {
+				std::vector<addr_freq*> correlated;
+				for (int j = 0; j < lookahead; j++) {
 					correlated = corr_map[temp_address];
 					if (correlated.size() <= 0) break;
 					int mru = find_mru_index(correlated);
 					temp_address = correlated[mru]->address;
-				}*/	
+				}	
 				predicted.insert(temp_address);
 			}
+			return predicted;
+		}*/
+
+		/*std::unordered_set<uint64_t> find_predicted_freqs() {
+			std::queue<uint64_t> to_visit;
+			to_visit.push(current_page);
+			
+			std::unordered_set<uint64_t> predicted;
+			int current_depth = 0;
+			while (!to_visit.empty() && current_depth <= lookahead) {
+				uint64_t addr = to_visit.top();
+				to_visit.pop();
+				
+				std::vector<addr_freq*> correlated = corr_map[addr];
+				for (int i = 0; i < correlated.size(); i++) {
+					predicted.insert(correlated[i]->address);
+					to_visit.push(correlated[i]->address);
+				}
+				current_depth += 1;
+			}	
+			return predicted;
+		}*/
+		
+		std::unordered_set<uint64_t> find_predicted_freqs() {
+			std::queue<uint64_t> to_visit;
+			to_visit.push(current_page);
+			
+			std::unordered_set<uint64_t> predicted;
+			int current_depth = 0;
+			int max_depth = pow(S, lookahead + 1);
+			while (!to_visit.empty() && current_depth <= max_depth) {
+				uint64_t addr = to_visit.front();
+				to_visit.pop();
+				
+				std::vector<addr_freq*> correlated = corr_map[addr];
+				for (int i = 0; i < correlated.size(); i++) {
+					predicted.insert(correlated[i]->address);
+					to_visit.push(correlated[i]->address);
+				}
+				current_depth += 1;
+			}	
 			return predicted;
 		}
 
@@ -194,16 +219,14 @@ class GAC {
 
 		std::vector<uint64_t> find_prefetch_addrs(uint64_t full_addr) {
 			set_current_values(full_addr);
-			// std::vector<addr_freq*> predicted = corr_map[current_page];
-			// std::vector<addr_freq*> predicted = find_predicted_freqs();
 			std::unordered_set<uint64_t> predicted = find_predicted_freqs();
 			update_prev_correlation();
 			
-			std::vector<uint64_t> result_addrs = freq_to_addresses(predicted);
+			std::vector<uint64_t> result_addrs= freq_to_addresses(predicted);
 			update_previous_values();
 			// turn a vector of structs into a vector of addresses
 			return result_addrs;
 		}
 };
 
-#endif // __GAC_H__
+#endif // __GAC_L_H__

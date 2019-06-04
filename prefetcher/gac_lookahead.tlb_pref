@@ -1,11 +1,11 @@
 #include "cache.h"
-#include "gac.h"
+#include "gac_lookahead.h"
 #include "champsim.h"
 #include "block.h"
 #include <vector>
 
-uint64_t S = 1;
-uint64_t lookahead = 0;
+uint64_t S = 9;
+uint64_t lookahead = 1;
 GAC gac(S, lookahead);
 
 uint64_t num_redundant = 0;
@@ -46,7 +46,7 @@ void CACHE::tlb_prefetcher_operate(uint32_t cpu, uint64_t addr, uint64_t ip, uin
 		num_redundant++; 
 	    continue; // redundant prefetches, we can look further in the stream if there are too many redundant prefetches
 	  }
-	  uint64_t pa = va_to_pa(cpu, instr_id, packet.full_addr, packet.address, 1); 
+	  uint64_t pa = va_to_pa(cpu, instr_id, packet.full_addr, packet.address, 1); // ?
 		packet.data = pa >> LOG2_PAGE_SIZE; // gets rid of the lower 0s  
 
 	  way = find_victim(cpu, instr_id, set, block[set], 0, packet.full_addr, PREFETCH);

@@ -8,7 +8,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 # Simulation parameters
-TRACE_DIR="/u/kbaldauf/Documents/comp_arch_research/TLB-Prefetcher/traces"
+TRACE_DIR="/u/kbaldauf/Documents/summer_research/TLB-Prefetcher/traces"
 WARM_INS=0
 SIM_INS=10
 TLB_PREFETCHER=${1}
