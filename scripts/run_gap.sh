@@ -45,7 +45,7 @@ do
     	chmod +x $SCRIPT_FILE
 
     	# create condor file
-    	/u/matthewp/research/scripts/condorize.sh $GPU $OUTPUT_DIR $BENCHMARK
+    	$CHAMP_PATH/scripts/condorize.sh $GPU $OUTPUT_DIR $BENCHMARK
     
     	# submit the condor file
     	/lusr/opt/condor/bin/condor_submit $CONDOR_FILE

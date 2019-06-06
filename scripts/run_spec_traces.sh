@@ -10,7 +10,7 @@ fi
 # Simulation parameters
 GPU=false
 TRACE_PATH="/scratch/cluster/akanksha/CRCRealTraces"
-CHAMP_PATH="$(pwd)"
+CHAMP_PATH="$(pwd)/.."
 
 BRANCH="perceptron"
 L1P="no"
@@ -22,7 +22,7 @@ CORES=1
 WARM_INS=0
 SIM_INS=100
 
-OUTPUT_DIR="${CHAMP_PATH}/output/${TLB_PREFETCHER}"
+OUTPUT_DIR="${CHAMP_PATH}/output/spec06/${TLB_PREFETCHER}"
 BINARY="${BRANCH}-${L1P}-${L2P}-${TLB_PREFETCHER}-${CACHE}-${CORES}core"
 
 # Ensure output dir exists
@@ -31,7 +31,7 @@ if test ! -d ${OUTPUT_DIR}; then
 fi
 
 # Ensure binary exists
-if test ! -f bin/${BINARY} ; then
+if test ! -f ${CHAMP_PATH}/bin/${BINARY} ; then
     echo "No binary found for ${TLB_PREFETCHER}"
     echo "Build champsim with your policy before running it"
     exit
@@ -48,10 +48,10 @@ while read TRACE; do
     chmod +x ${SCRIPT_FILE}
 
     # create condor file
-    /u/matthewp/research/scripts/condorize.sh ${GPU} ${OUTPUT_DIR} ${TRACE}
+    ${CHAMP_PATH}/scripts/condorize.sh ${GPU} ${OUTPUT_DIR} ${TRACE}
 
     # submit the condor file
     /lusr/opt/condor/bin/condor_submit ${CONDOR_FILE}
-done < sim_lists/spec/comp_traces.txt
+done < $CHAMP_PATH/sim_lists/spec/comp_traces.txt
 
-#done < sim_lists/spec/astar.txt 
+#done < $CHAMP_PATH/sim_lists/spec/astar.txt 
