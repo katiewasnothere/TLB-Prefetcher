@@ -1,0 +1,31 @@
+#include "cache.h"
+#include "champsim.h"
+#include "block.h"
+#include <unordered_set>
+#include <vector>
+
+std::unordered_set<uint64_t> unique_pcs;
+
+void CACHE::tlb_prefetcher_initialize() 
+{
+
+}
+
+// this is the trigger for a prefetcher
+void CACHE::tlb_prefetcher_operate(uint32_t cpu, uint64_t addr, uint64_t ip, uint8_t cache_hit, uint8_t type)
+{
+	if (ip == 0) { return;}
+	unique_pcs.insert(ip);
+}
+
+// when a requested line is filled (may cause eviction)  
+void CACHE::tlb_prefetcher_cache_fill(uint32_t cpu, uint64_t addr, uint32_t set, uint32_t way, uint8_t prefetch, uint64_t evicted_addr)
+{
+
+}
+
+void CACHE::tlb_prefetcher_final_stats()
+{
+	printf("\nTLB prefetcher final stats\n");
+	printf("Number unique PC's: %d\n", unique_pcs.size());
+}

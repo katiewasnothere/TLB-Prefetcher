@@ -166,7 +166,7 @@ class GAC {
 			}
 			return predicted;
 		}*/
-
+		
 		/*std::unordered_set<uint64_t> find_predicted_freqs() {
 			std::queue<uint64_t> to_visit;
 			to_visit.push(current_page);
@@ -187,7 +187,42 @@ class GAC {
 			return predicted;
 		}*/
 		
-		std::unordered_set<uint64_t> find_predicted_freqs() {
+		// breadth wise version
+		/*std::unordered_set<uint64_t> find_predicted_freqs() {
+			std::unordered_set<uint64_t> predicted; 
+			uint64_t to_prefetch = S;
+	
+			std::unordered_set<uint64_t> added;
+			std::queue<uint64_t> to_visit;
+			to_visit.push(current_page); 
+			added.push(current_page);
+
+			int seen = 0;
+
+			while (!to_visit.empty() && seen < lookahead) {
+				uint64_t addr = to_visit.front();
+				to_visit.pop();
+				std::vector<addr_freq*> correlated = corr_map[addr];
+				for (int i = 0; i < correlated.size(); i++) {
+					if (added.count(correlated[i]->address == 0) {
+						to_visit.push(correlated[i]->address);
+						added.push(addr);
+					}
+				}
+				if (current_page != addr) {
+					seen++;
+				}
+			}
+			
+			while (predicted.size() <= to_prefetch && !to_visit.empty()) {
+				uint64_t addr = to_visit.front();
+				to_visit.pop();
+				predicted.insert(addr);
+			}
+			return predicted; 
+		}*/	
+	
+		/*std::unordered_set<uint64_t> find_predicted_freqs() {
 			std::queue<uint64_t> to_visit;
 			to_visit.push(current_page);
 			
@@ -206,6 +241,49 @@ class GAC {
 				current_depth += 1;
 			}	
 			return predicted;
+		}*/
+		// depth wise 
+		std::unordered_set<uint64_t> find_predicted_freqs() {
+			// don't prefetch again if we accessed the same page
+			if (current_page == last_accessed_page) {
+				return std::unordered_set<uint64_t>();
+			}
+			std::unordered_set<uint64_t> predicted;
+			
+			std::queue<uint64_t> to_visit;
+			uint64_t target_level = lookahead+1;
+			uint64_t current_level = 0;
+			uint64_t END_LEVEL = UINT_MAX;
+			
+			to_visit.push(current_page);
+			to_visit.push(END_LEVEL);
+			printf("Predicting addrs for: %ld\n", current_page);
+			while (!to_visit.empty()) {
+				uint64_t addr = to_visit.front();
+				to_visit.pop();
+				
+				if (current_level == target_level && addr != END_LEVEL && addr != current_page) {
+					predicted.insert(addr);
+				}
+
+				if (addr == END_LEVEL) {
+					// we reached the end of a level, push next level end
+					printf("current level: %ld, target level: %ld\n", current_level, target_level);
+					if (to_visit.front() != END_LEVEL) {
+						to_visit.push(END_LEVEL);
+					}
+					current_level += 1;
+					if (current_level > target_level) break;
+					
+				} else {
+					std::vector<addr_freq*> correlated = corr_map[addr];
+					for (int i = 0; i < correlated.size(); i++) {
+						to_visit.push(correlated[i]->address);
+					}
+				}
+			}
+
+			return predicted;	
 		}
 
 	public:
