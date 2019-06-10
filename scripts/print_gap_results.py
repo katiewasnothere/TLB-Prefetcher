@@ -2,7 +2,7 @@
 
 import os
 
-print('(suite, name of benchmark, IPC, Prefetch Accuracy, Redundancy)')
+print('(suite, name of benchmark, IPC, Coverage, Prefetch Accuracy, Redundancy)')
 print('----------------------------------------')
 
 prefetcher = input("Enter prefetcher: ")
@@ -10,6 +10,14 @@ print('\n')
 champ_path = os.chdir("..") 
 #suites = ["gap-g15", "gap-g17", "gap-g20", "gap-g22"]
 suites=["gap-g22"]
+
+standard_misses = dict()
+standard_misses['bc'] = float(52122116)
+standard_misses['bfs'] = float(3815191)
+standard_misses['cc'] = float(41788517)
+standard_misses['pr'] = float(89319922)
+standard_misses['sssp'] = float(40477247)
+standard_misses['tc'] = float(1498)
 
 for suite in suites:
 
@@ -22,6 +30,11 @@ for suite in suites:
 			if output_line.startswith('Finished CPU 0 instructions:'):
 				ipc_rate = float(output_line.split()[9])
 				result = result + ', '+ bench_name +', ' + str(ipc_rate)
+			elif output_line.startswith('STLB TOTAL'):
+				standard = standard_misses[bench_name]
+				new_misses = float(output_line.split()[7])
+				coverage = float((standard - new_misses)/standard) * 100 
+				result += result + ', ' + str(coverage)
 			elif output_line.startswith('STLB PREFETCH  REQUESTED:'):
 				issued = float(output_line.split()[5])
 				useful = float(output_line.split()[9])
