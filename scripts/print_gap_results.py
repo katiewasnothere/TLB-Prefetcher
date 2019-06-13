@@ -34,7 +34,7 @@ for suite in suites:
 				standard = standard_misses[bench_name]
 				new_misses = float(output_line.split()[7])
 				coverage = float((standard - new_misses)/standard) * 100 
-				result += result + ', ' + str(coverage)
+				result = result + ', ' + str(coverage)
 			elif output_line.startswith('STLB PREFETCH  REQUESTED:'):
 				issued = float(output_line.split()[5])
 				useful = float(output_line.split()[9])

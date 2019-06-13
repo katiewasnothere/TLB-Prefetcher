@@ -4,8 +4,9 @@
 #include "block.h"
 #include <vector>
 
-uint64_t S = 2;
-PLAC plac(S);
+uint64_t S = 4;
+uint64_t lookahead = 0;
+PLAC plac(S, lookahead);
 
 uint64_t num_redundant = 0;
 uint64_t total_prefetches = 0;

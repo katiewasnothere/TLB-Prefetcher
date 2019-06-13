@@ -19,6 +19,7 @@ class correlation_state {
 	private:
 		std::map<uint64_t, std::vector<addr_freq*> > corr_map;
 		uint64_t S;
+		uint64_t lookahead;
 		uint64_t last_accessed_page;
 		uint64_t current_page;
 
@@ -105,7 +106,8 @@ class correlation_state {
 		}
 
 	public:
-		correlation_state(uint64_t slots) : S(slots),
+		correlation_state(uint64_t slots, uint64_t la) : S(slots),
+			lookahead(la), 
 			last_accessed_page(0),
 			current_page(0) {}
 
@@ -130,10 +132,12 @@ class correlation_state {
 class PLAC {
 	private:
 		uint64_t S;
+		uint64_t lookahead;
 		std::map<uint64_t, correlation_state*> pc_corr_map;
 
 	public:
-		PLAC(uint64_t slots) : S(slots){}
+		PLAC(uint64_t slots, uint64_t la) : S(slots),
+			lookahead(la) {}
 
 		~PLAC(){}
 
@@ -143,7 +147,7 @@ class PLAC {
 				return {};
 			}
 			if (pc_corr_map.count(ip) == 0) {
-				correlation_state* new_state = new correlation_state(S);
+				correlation_state* new_state = new correlation_state(S, lookahead);
 				pc_corr_map[ip] = new_state;
 			}	
 			return pc_corr_map[ip]->find_prefetch_addrs(addr);
