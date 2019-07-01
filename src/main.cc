@@ -1,5 +1,6 @@
 #define _BSD_SOURCE
 
+#include <bf/all.hpp>
 #include <getopt.h>
 #include "ooo_cpu.h"
 #include "uncore.h"
@@ -29,6 +30,11 @@ uint32_t PAGE_TABLE_LATENCY = 0, SWAP_LATENCY = 0;
 queue <uint64_t > page_queue;
 map <uint64_t, uint64_t> page_table, inverse_table, recent_page, unique_cl[NUM_CPUS];
 uint64_t previous_ppage, num_adjacent_page, num_cl[NUM_CPUS], allocated_pages, num_page[NUM_CPUS], minor_fault[NUM_CPUS], major_fault[NUM_CPUS];
+
+
+// STLB bloom filters
+bf::counting_bloom_filter* stlb_bloom[NUM_CPUS];
+std::unordered_set<uint64_t> seen_addresses;
 
 void record_roi_stats(uint32_t cpu, CACHE *cache)
 {
@@ -444,6 +450,21 @@ uint64_t va_to_pa(uint32_t cpu, uint64_t instr_id, uint64_t va, uint64_t unique_
     DP ( if (warmup_complete[cpu]) {
     cout << "[PAGE_TABLE] instr_id: " << instr_id << " vpage: " << hex << vpage;
     cout << " => ppage: " << (pa >> LOG2_PAGE_SIZE) << " vadress: " << unique_va << " paddress: " << pa << dec << endl; });
+	
+	
+#ifdef HEADROOM
+	uint64_t current_address = (unique_va >> LOG2_PAGE_SIZE) << LOG2_PAGE_SIZE; 
+	if (seen_addresses.count(current_address) == 0) {
+		// compulsory miss, add latency
+		seen_addresses.insert(current_address);	
+		if (swap)
+        	stall_cycle[cpu] = current_core_cycle[cpu] + SWAP_LATENCY;
+    	else
+        	stall_cycle[cpu] = current_core_cycle[cpu] + PAGE_TABLE_LATENCY;
+ 
+	}
+	return pa;
+#endif
 
 	if (!is_prefetch) {
     	if (swap)
@@ -671,6 +692,8 @@ int main(int argc, char** argv)
         ooo_cpu[i].STLB.upper_level_icache[i] = &ooo_cpu[i].ITLB;
         ooo_cpu[i].STLB.upper_level_dcache[i] = &ooo_cpu[i].DTLB;
 
+		stlb_bloom[i] = new bf::counting_bloom_filter(bf::make_hasher(3), STLB_SET*STLB_WAY*3*4, 4);
+		// stlb_set[i] = new unordered_set<uint64_t>();
         // PRIVATE CACHE
         ooo_cpu[i].L1I.cpu = i;
         ooo_cpu[i].L1I.cache_type = IS_L1I;

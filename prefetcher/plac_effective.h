@@ -86,21 +86,25 @@ class correlation_state {
             } 
         }
 
-        std::unordered_set<uint64_t> find_predicted_freqs() {
+		std::unordered_set<uint64_t> find_predicted_freqs(uint32_t cpu) {
 			std::sort(corr_map[current_page].begin(), corr_map[current_page].end(), Comparator());
 			
 			std::vector<addr_freq*> initial = corr_map[current_page];
+			int size = initial.size();
 			std::unordered_set<uint64_t> predicted;
+			
+			int added = 0;
+			int index = 0;
 
-			int size = initial.size() < S ? initial.size() : S;
-            // printf("about to add to predicted\n"); 
-			for (int i = 0; i < size; i++) {
-                // printf("%ld\n", initial[i]->times_seen);
-				predicted.insert(initial[i]->address);
+			while (added < S && index < size) {
+				if (stlb_bloom[cpu]->lookup(initial[index]->address) == 0) {
+					predicted.insert(initial[index]->address);
+					added += 1;
+				}
+				index += 1; 
 			}
 			return predicted;
 		}
-
 
     public:
         correlation_state(uint64_t slots, uint64_t la) : S(slots),
@@ -112,14 +116,14 @@ class correlation_state {
         ~correlation_state(){}
 
 
-        std::unordered_set<uint64_t> find_prefetch_addrs(uint64_t full_addr) {
+        std::unordered_set<uint64_t> find_prefetch_addrs(uint64_t full_addr, uint32_t cpu) {
             set_current_values(full_addr);
            
             if (current_page == last_accessed_page) {
                 return std::unordered_set<uint64_t>();
             } 
 			total_triggers += 1;
-            std::unordered_set<uint64_t> result_addrs = find_predicted_freqs(); 
+            std::unordered_set<uint64_t> result_addrs = find_predicted_freqs(cpu); 
 
             update_prev_correlation();
             
@@ -146,7 +150,7 @@ class PLAC {
 
         ~PLAC(){}
 
-        std::unordered_set<uint64_t> find_prefetch_addrs(uint64_t addr, uint64_t ip) {
+        std::unordered_set<uint64_t> find_prefetch_addrs(uint64_t addr, uint64_t ip, uint32_t cpu) {
             if (ip == 0) {
                 // dummy ip
                 return {};
@@ -155,7 +159,7 @@ class PLAC {
                 correlation_state* new_state = new correlation_state(S, lookahead);
                 pc_corr_map[ip] = new_state;
             }   
-            return pc_corr_map[ip]->find_prefetch_addrs(addr);
+            return pc_corr_map[ip]->find_prefetch_addrs(addr, cpu);
         }
 	
 		uint64_t get_total_triggers() {

@@ -11,7 +11,7 @@
 
 typedef struct address_freq {
 	uint64_t address;
-	uint64_t times_seen;
+	uint64_t times_seen;;
 
 	address_freq(uint64_t d) : address(d), times_seen(0){}
 }addr_freq;
@@ -33,7 +33,7 @@ class GAC {
 		uint64_t last_accessed_page;
 		uint64_t current_page;
 
-        uint64_t total_triggers;
+		uint64_t total_triggers;
 
 		uint64_t get_page_addr(uint64_t full_addr) {
 			uint64_t page = (full_addr >> LOG2_PAGE_SIZE) << LOG2_PAGE_SIZE;
@@ -86,18 +86,30 @@ class GAC {
 			} 
 		}
 
-		std::unordered_set<uint64_t> find_predicted_freqs() {
+		std::unordered_set<uint64_t> find_predicted_freqs(uint32_t cpu) {
 			std::sort(corr_map[current_page].begin(), corr_map[current_page].end(), Comparator());
 			
 			std::vector<addr_freq*> initial = corr_map[current_page];
+			int size = initial.size();
+			
 			std::unordered_set<uint64_t> predicted;
 
-			int size = initial.size() < S ? initial.size() : S; 
-			// printf("About to start creating predictions\n");	
-			for (int i = 0; i < size; i++) {
-				//printf("%ld\n", initial[i]->times_seen);
-				predicted.insert(initial[i]->address);
-			}
+            int added = 0;
+            int index = 0;
+			//printf("initial size is %ld\n", size);
+            while (added < S && index < size) {
+				// TODO: get cpu
+				// printf("Result from bloom filter is %ld\n", stlb_bloom[cpu]->lookup(initial[index]->address)); 
+                if (stlb_bloom[cpu]->lookup(initial[index]->address) == 0) {
+				// if (stlb_set[cpu].count(initial[index]->address) == 0) {
+					// this address is not present in the tlb, predict it
+					// printf("addind to predicted\n");
+					predicted.insert(initial[index]->address);
+					added += 1;
+				}
+				index += 1;
+            }
+			// printf("added %ld\n", added);
 			return predicted;
 		}
 
@@ -106,28 +118,28 @@ class GAC {
 			lookahead(lookahead_amount),
 			last_accessed_page(0),
 			current_page(0),
-            total_triggers(0) {}
+			total_triggers(0) {}
 
 		~GAC(){}
 
 
-		std::unordered_set<uint64_t> find_prefetch_addrs(uint64_t full_addr) {
+		std::unordered_set<uint64_t> find_prefetch_addrs(uint64_t full_addr, uint32_t cpu) {
 			set_current_values(full_addr);
 
 			if (current_page == last_accessed_page) return {};
-            
-            total_triggers += 1;
-			std::unordered_set<uint64_t> predicted = find_predicted_freqs();
+			total_triggers += 1;
+			std::unordered_set<uint64_t> predicted = find_predicted_freqs(cpu);
 			update_prev_correlation();
 			
 
 			// turn a vector of structs into a vector of addresses
 			return predicted;
 		}
-        
-        uint64_t get_total_triggers() {
+		
+		uint64_t get_total_triggers() {
             return total_triggers;
         }
+
 };
 
 #endif // __GAC_H__

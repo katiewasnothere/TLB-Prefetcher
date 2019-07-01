@@ -12,7 +12,7 @@ CPU 0 runs /u/kbaldauf/Documents/summer_research/TLB-Prefetcher/traces/astar_163
 
 Warmup complete CPU 0 instructions: 1 cycles: 8 (Simulation time: 0 hr 0 min 0 sec) 
 
-Finished CPU 0 instructions: 10000000 cycles: 21201693 cumulative IPC: 0.47166 (Simulation time: 0 hr 0 min 29 sec) 
+Finished CPU 0 instructions: 10000000 cycles: 21039311 cumulative IPC: 0.475301 (Simulation time: 0 hr 0 min 30 sec) 
 
 CPU 0 Branch Prediction Accuracy: 96.0085% MPKI: 5.1463
 
@@ -20,16 +20,16 @@ ChampSim completed all CPUs
 
 Region of Interest Statistics
 
-CPU 0 cumulative IPC: 0.47166 instructions: 10000000 cycles: 21201693
-L1D TOTAL     ACCESS:    3014003  HIT:    2935403  MISS:      78600
-L1D LOAD      ACCESS:    1981981  HIT:    1912317  MISS:      69664
-L1D RFO       ACCESS:    1032022  HIT:    1023086  MISS:       8936
+CPU 0 cumulative IPC: 0.475301 instructions: 10000000 cycles: 21039311
+L1D TOTAL     ACCESS:    3013490  HIT:    2934890  MISS:      78600
+L1D LOAD      ACCESS:    1981465  HIT:    1911801  MISS:      69664
+L1D RFO       ACCESS:    1032025  HIT:    1023089  MISS:       8936
 L1D PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
 L1D WRITEBACK ACCESS:          0  HIT:          0  MISS:          0
 L1D PREFETCH  REQUESTED:          0  ISSUED:          0  FILLED:          0  USEFUL:          0  USELESS:          0
   ACCURACY:       -nan
-L1I TOTAL     ACCESS:    2676104  HIT:    2676092  MISS:         12
-L1I LOAD      ACCESS:    2676104  HIT:    2676092  MISS:         12
+L1I TOTAL     ACCESS:    2676079  HIT:    2676067  MISS:         12
+L1I LOAD      ACCESS:    2676079  HIT:    2676067  MISS:         12
 L1I RFO       ACCESS:          0  HIT:          0  MISS:          0
 L1I PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
 L1I WRITEBACK ACCESS:          0  HIT:          0  MISS:          0
@@ -49,29 +49,26 @@ LLC PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
 LLC WRITEBACK ACCESS:      16846  HIT:      16846  MISS:          0
 LLC PREFETCH  REQUESTED:          0  ISSUED:          0  FILLED:          0  USEFUL:          0  USELESS:          0
   ACCURACY:       -nan
-DTLB TOTAL     ACCESS:    3030772  HIT:    2986290  MISS:      44482
-DTLB LOAD      ACCESS:    2093625  HIT:    2049552  MISS:      44073
-DTLB RFO       ACCESS:     937147  HIT:     936738  MISS:        409
+DTLB TOTAL     ACCESS:    3029967  HIT:    2985485  MISS:      44482
+DTLB LOAD      ACCESS:    2092815  HIT:    2048742  MISS:      44073
+DTLB RFO       ACCESS:     937152  HIT:     936743  MISS:        409
 DTLB PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
 DTLB WRITEBACK ACCESS:          0  HIT:          0  MISS:          0
 DTLB PREFETCH  REQUESTED:          0  ISSUED:          0  FILLED:          0  USEFUL:          0  USELESS:          0
   ACCURACY:       -nan
-STLB TOTAL     ACCESS:      44484  HIT:      38940  MISS:       5544
-STLB LOAD      ACCESS:      44075  HIT:      38661  MISS:       5414
-STLB RFO       ACCESS:        409  HIT:        279  MISS:        130
+STLB TOTAL     ACCESS:      44484  HIT:      37290  MISS:       7194
+STLB LOAD      ACCESS:      44075  HIT:      37010  MISS:       7065
+STLB RFO       ACCESS:        409  HIT:        280  MISS:        129
 STLB PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
 STLB WRITEBACK ACCESS:          0  HIT:          0  MISS:          0
-STLB PREFETCH  REQUESTED:          0  ISSUED:      30778  FILLED:      30778  USEFUL:       2251  USELESS:      28423
-  ACCURACY:    7.31367
+STLB PREFETCH  REQUESTED:          0  ISSUED:          0  FILLED:          0  USEFUL:          0  USELESS:          0
+  ACCURACY:       -nan
 Major fault: 0 Minor fault: 3792
-
-TLB prefetcher final stats
-	redundant prefetches vs total calculated:	475024 of 505802
 
 DRAM Statistics
  CHANNEL 0
- RQ ROW_BUFFER_HIT:      14499  ROW_BUFFER_MISS:      12020
- DBUS_CONGESTED:       2611
- WQ ROW_BUFFER_HIT:         64  ROW_BUFFER_MISS:        868  FULL:          0
+ RQ ROW_BUFFER_HIT:      14489  ROW_BUFFER_MISS:      12030
+ DBUS_CONGESTED:       2504
+ WQ ROW_BUFFER_HIT:         62  ROW_BUFFER_MISS:        890  FULL:          0
 
  AVG_CONGESTED_CYCLE: 11

@@ -5,7 +5,7 @@ import os
 prefetcher = input("Enter the prefetcher:")
 print('\n')
 
-print('(suite, name of benchmark, IPC, Coverage, Prefetch Accuracy, Redundancy)')
+print('suite, name of benchmark, IPC, Coverage, Prefetch Accuracy, Redundancy, Avg effective degree')
 print('----------------------------------------')
 
 champ_path = os.chdir("..") 
@@ -21,7 +21,7 @@ for line in sim_list:
 			ipc_rate = float(output_line.split()[9])
 			result = result + ', '+ bench_name +', ' + str(ipc_rate)
 		elif output_line.startswith('STLB TOTAL'):
-			no_tlb_output = open('output/no_tlb/'+bench_name +'.txt', 'r')
+			no_tlb_output = open('output/spec06/no_tlb/'+bench_name +'.txt', 'r')
 			missed_curr = float(output_line.split()[7])
 			missed_naive = 0.0
 			for line_naive in no_tlb_output:
@@ -48,5 +48,11 @@ for line in sim_list:
 				result = result + ', ' + str(redundancy_percent) 
 			else:
 				result = result + ', 0.0'	
+        
+		elif output_line.startswith('\tnonredundant prefetches/'):
+			prefetches = float(output_line.split()[4])
+			triggers = float(output_line.split()[6])
+			avg_issued = float(prefetches/triggers)
+			result = result + ', ' + str(avg_issued)
 
 	print(result)

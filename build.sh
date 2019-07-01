@@ -14,6 +14,7 @@ L2C_PREFETCHER="no"   # prefetcher/*.l2c_pref
 TLB_PREFETCHER="${1}"
 LLC_REPLACEMENT="lru"  # replacement/*.llc_repl
 NUM_CORE=${2}            # tested up to 8-core system
+HEADROOM="0"
 
 ############## Some useful macros ###############
 BOLD=$(tput bold)
@@ -62,6 +63,14 @@ if [ ! -f ./branch/${BRANCH}.bpred ] || [ ! -f ./prefetcher/${L1D_PREFETCHER}.l1
 	echo "$p"
 	exit
 fi
+
+# Check for running headroom study
+if [ "$HEADROOM" != "0" ]
+then
+	#we're running the headroom study, set the macro definition
+	echo "${BOLD}Building compulsory HEADROOM study Champsim... ${NORMAL}"
+	sed -i.bak 's@//\x23define HEADROOM\>@#define HEADROOM@g' inc/champsim.h
+fi 
 
 # Check for multi-core
 if [ "$NUM_CORE" != "1" ]
@@ -113,6 +122,11 @@ mv bin/champsim bin/${BINARY_NAME}
 sed -i.bak 's/\<NUM_CPUS '${NUM_CORE}'\>/NUM_CPUS 1/g' inc/champsim.h
 sed -i.bak 's/\<DRAM_CHANNELS 2\>/DRAM_CHANNELS 1/g' inc/champsim.h
 sed -i.bak 's/\<DRAM_CHANNELS_LOG2 1\>/DRAM_CHANNELS_LOG2 0/g' inc/champsim.h
+
+if [ "$HEADROOM" != "0" ]
+then
+	sed -i.bak 's@\x23define HEADROOM\>@//#define HEADROOM@g' inc/champsim.h
+fi
 
 cp branch/perceptron.bpred branch/branch_predictor.cc
 cp prefetcher/no.l1d_pref prefetcher/l1d_prefetcher.cc

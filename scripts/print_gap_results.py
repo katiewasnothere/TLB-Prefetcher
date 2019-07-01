@@ -2,7 +2,7 @@
 
 import os
 
-print('(suite, name of benchmark, IPC, Coverage, Prefetch Accuracy, Redundancy)')
+print('suite, name of benchmark, IPC, Coverage, Prefetch Accuracy, Redundancy, Avg effective degree')
 print('----------------------------------------')
 
 prefetcher = input("Enter prefetcher: ")
@@ -50,6 +50,12 @@ for suite in suites:
 					redundancy_percent = float(redundant / total) * 100
 					result = result + ', ' + str(redundancy_percent) 
 				else:
-					result = result + ', 0.0'	
+					result = result + ', 0.0'
+
+			elif output_line.startswith('\tnonredundant prefetches/'):
+				prefetches = float(output_line.split()[4])
+				triggers = float(output_line.split()[6]) 
+				avg_issued = float(prefetches/triggers)
+				result = result+ ', ' + str(avg_issued)	
 
 		print(result)

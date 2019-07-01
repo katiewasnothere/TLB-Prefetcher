@@ -25,6 +25,7 @@
 #define LLC_BYPASS
 #define DRC_BYPASS
 #define NO_CRC2_COMPILE
+//#define HEADROOM
 
 #ifdef DEBUG_PRINT
 #define DP(x) x

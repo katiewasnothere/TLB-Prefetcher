@@ -384,8 +384,8 @@ void CACHE::handle_writeback()
                     // COLLECT STATS
                     sim_miss[writeback_cpu][WQ.entry[index].type]++;
                     sim_access[writeback_cpu][WQ.entry[index].type]++;
-
-                    fill_cache(set, way, &WQ.entry[index]);
+					
+					fill_cache(set, way, &WQ.entry[index]);
 
                     // mark dirty
                     block[set][way].dirty = 1;
@@ -525,7 +525,6 @@ void CACHE::handle_read()
 
                             // emulate page table walk
                             uint64_t pa = va_to_pa(read_cpu, RQ.entry[index].instr_id, RQ.entry[index].full_addr, RQ.entry[index].address, 0);
-
                             RQ.entry[index].data = pa >> LOG2_PAGE_SIZE;
                             RQ.entry[index].event_cycle = current_core_cycle[read_cpu];
                             return_data(&RQ.entry[index]);
@@ -833,6 +832,14 @@ void CACHE::fill_cache(uint32_t set, uint32_t way, PACKET *packet)
             assert(0);
     }
 #endif
+	
+	if (cache_type == IS_STLB) {
+		uint64_t page_addr = (block[set][way].full_addr >> LOG2_PAGE_SIZE) << LOG2_PAGE_SIZE;
+		// printf("Filling cache, removing %lx from cpu %ld\n", page_addr, packet->cpu);
+		stlb_bloom[packet->cpu]->remove(page_addr);
+		// stlb_set[packet->cpu].erase(page_addr);
+	}	
+
     if (block[set][way].prefetch && (block[set][way].used == 0)) {
         pf_useless++;
 	}
@@ -858,6 +865,13 @@ void CACHE::fill_cache(uint32_t set, uint32_t way, PACKET *packet)
     block[set][way].cpu = packet->cpu;
     block[set][way].instr_id = packet->instr_id;
 
+	if (cache_type == IS_STLB) {
+		uint64_t new_page = (packet->full_addr >> LOG2_PAGE_SIZE) << LOG2_PAGE_SIZE;
+		// printf("Adding %lx to %ld\n", new_page, packet->cpu);
+		stlb_bloom[packet->cpu]->add(new_page);
+		// stlb_set[packet->cpu].insert(new_page);
+	}
+
     DP ( if (warmup_complete[packet->cpu]) {
     cout << "[" << NAME << "] " << __func__ << " set: " << set << " way: " << way;
     cout << " lru: " << block[set][way].lru << " tag: " << hex << block[set][way].tag << " full_addr: " << block[set][way].full_addr;
@@ -882,7 +896,6 @@ int CACHE::check_hit(PACKET *packet)
     //     cout << "There is an error\n" << endl;
     // }
    // cout << packet->full_addr << endl;
-
 
     // hit
     for (uint32_t way=0; way<NUM_WAY; way++) {
@@ -926,6 +939,14 @@ int CACHE::invalidate_entry(uint64_t inval_addr)
             cout << "[" << NAME << "] " << __func__ << " inval_addr: " << hex << inval_addr;
             cout << " tag: " << block[set][way].tag << " data: " << block[set][way].data << dec;
             cout << " set: " << set << " way: " << way << " lru: " << block[set][way].lru << " cycle: " << current_core_cycle[cpu] << endl; });
+
+			if (cache_type == IS_STLB) {
+				// printf("Removing addr %ld from %ld\n", block[set][way].full_addr, block[set][way].cpu);
+				uint64_t erase_addr = (block[set][way].full_addr >> LOG2_PAGE_SIZE) << LOG2_PAGE_SIZE;
+				stlb_bloom[block[set][way].cpu]->remove(block[set][way].full_addr);
+
+				// stlb_set[block[set][way].cpu].erase(erase_addr);
+			}
 
             break;
         }
@@ -1118,7 +1139,6 @@ int CACHE::add_wq(PACKET *packet)
 int CACHE::prefetch_line(uint64_t ip, uint64_t base_addr, uint64_t pf_addr, int fill_level)
 {
     pf_requested++;
-
     if (PQ.occupancy < PQ.SIZE) {
         //if ((base_addr>>LOG2_PAGE_SIZE) == (pf_addr>>LOG2_PAGE_SIZE)) {
 

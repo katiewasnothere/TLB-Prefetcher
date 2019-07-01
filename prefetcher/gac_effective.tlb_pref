@@ -1,11 +1,11 @@
 #include "cache.h"
-#include "gac.h"
+#include "gac_effective.h"
 #include "champsim.h"
 #include "block.h"
 #include <vector>
 #include <unordered_set>
 
-uint64_t S = 10;
+uint64_t S = 6;
 uint64_t lookahead = 0;
 GAC gac(S, lookahead);
 
@@ -32,7 +32,7 @@ PACKET make_packet(uint32_t cpu, uint64_t pf_addr) {
 // this is the trigger for a prefetcher
 void CACHE::tlb_prefetcher_operate(uint32_t cpu, uint64_t addr, uint64_t ip, uint8_t cache_hit, uint8_t type)
 {
-    std::unordered_set<uint64_t> predicted = gac.find_prefetch_addrs(addr);
+    std::unordered_set<uint64_t> predicted = gac.find_prefetch_addrs(addr, cpu);
     uint64_t instr_id = 0; // set instruction id to zero because only used for debugging
     for (uint64_t prediction : predicted) {
       if (prediction <= 0) {
@@ -44,7 +44,8 @@ void CACHE::tlb_prefetcher_operate(uint32_t cpu, uint64_t addr, uint64_t ip, uin
       total_prefetches++; 
         // TODO: handle overflow for counters 
       if(way != -1) {
-        num_redundant++; 
+        num_redundant++;
+		// printf("Address was: %lx\n", prediction); 
         continue; // redundant prefetches, we can look further in the stream if there are too many redundant prefetches
       }
       uint64_t pa = va_to_pa(cpu, instr_id, packet.full_addr, packet.address, 1); 
@@ -68,6 +69,5 @@ void CACHE::tlb_prefetcher_final_stats()
     printf("\nTLB prefetcher final stats\n");
     printf("\tredundant prefetches vs total calculated:");
     printf("\t%ld of %ld\n", num_redundant, total_prefetches); 
-    
-    printf("\tnonredundant prefetches/number prefetch triggers: %ld / %ld\n", total_prefetches, gac.get_total_triggers());
+	printf("\tnonredundant prefetches/number prefetch triggers: %ld / %ld\n", total_prefetches, gac.get_total_triggers());
 }

@@ -4,14 +4,14 @@ srcExt = cc
 srcDir = src branch replacement prefetcher
 objDir = obj
 binDir = bin
-inc = inc
+inc = inc /u/kbaldauf/include
 
 debug = 1
 
 CFlags = -Wall -O3 -std=c++11
-LDFlags = -lboost_serialization
-libs =
-libDir =
+LDFlags = -lboost_serialization -lbf  
+libs = 
+libDir = /u/kbaldauf/lib
 
 
 #************************ DO NOT EDIT BELOW THIS LINE! ************************
