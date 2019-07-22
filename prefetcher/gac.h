@@ -128,6 +128,10 @@ class GAC {
         uint64_t get_total_triggers() {
             return total_triggers;
         }
+		
+		std::map<uint64_t, std::vector<addr_freq*> > get_correlations() {
+			return corr_map;
+		}
 };
 
 #endif // __GAC_H__
